@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DerRosarotePanzer</title>
+
+    <link rel="shortcut icon" type="image/png" sizes="64x64" href="favicon64.png">
+
+    <link rel="stylesheet" href="/assets/style.css?cb=11" />
+</head>
+<body>
+
+<div class="nav mobile">
+    <div class="button supports">Unterstützen</div>
+    <div class="button socials">Kontakt / Social Media</div>
+</div>
+
+<div class="nav desktop socials">
+    <a class="social icon protonmail" target="_blank" href="mailto:derrosarotepanzer@protonmail.com">derrosarotepanzer<br>@protonmail.com</a>
+    <a class="social icon telegram" target="_blank" href="https://t.me/RosaroterPanzerBackup">t.me/RosaroterPanzerBackup</a>
+    <a class="social icon gettr" target="_blank" href="https://gettr.com/user/rosaroterpanzer">gettr.com<br>/user/rosaroterpanzer</a>
+    <a class="social icon instagram" target="_blank" href="https://instagram.com/rosarotepanzer">instagram.com<br>/rosarotepanzer</a>
+    <a class="social icon twitter" target="_blank" href="https://twitter.com/RosarotePanzer">twitter.com<br>/RosarotePanzer</a>
+    <a class="social icon youtube" target="_blank" href="https://youtube.com/DerrosarotePanzer">youtube.com<br>/DerrosarotePanzer</a>
+</div>
+<div class="nav desktop supports">
+    <a class="support icon lightning" href="lightning:LNURL1DP68GURN8GHJ7AMPD3KX2AR0VEEKZAR0WD5XJTNRDAKJ7TNHV4KXCTTTDEHHWM30D3H82UNVWQHKZ6TJWD5KX6MRV9KHQVFJV3AQXK"></a>
+    <a class="support icon bitcoin" href="bitcoin:bc1qtavlxx50eu8djwmlajj6dsch4nrmpmzgrawg5l"></a>
+    <a class="support icon monero" href="monero:45oesfHwHm3TKcKNosJXxE2J2hBh3GajNU5BcaozvacyiBwsNgygdKqBfVQeD8SmsKNhpe6hSLvbdF1vsDjnJ83kELKBCgJ"></a>
+</div>
+
+<div id="gallery"></div>
+<div id="crypto"></div>
+<div class="footer wide">
+   Made with 💛 by an <br>
+   anonymous supporter.
+   <br>
+   <br>
+   Some images from <a class="mobilelink" target="_blank" href="http://icons8.com/">icons8.com</a>.
+</div>
+
+<div class="footer mobile">
+   Made with 💛 by an anonymous supporter. <br>
+   Some images from <a class="mobilelink" target="_blank" href="http://icons8.com/">icons8.com</a>.
+</div>
+
+<script type="module">
+import PhotoSwipeLightbox from '/assets/photoswipe-lightbox.esm.js';
+
+const lightbox = new PhotoSwipeLightbox({
+  pswpModule: () => import('/assets/photoswipe.esm.js'),
+  loop: false,
+})
+lightbox.on('change', panzerApp.updateGalleryHandler)
+lightbox.init()
+window.lightbox = lightbox
+</script>
+
+<script type="text/javascript" src="/assets/app.js?cb=11"></script>
+
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/assets/photoswipe.css">
+<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/assets/icons.css" />
+</body>
+</html>

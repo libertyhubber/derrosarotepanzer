@@ -1,0 +1,228 @@
+(function(){
+
+const THUMBNAIL_SIZE = 150
+const THUMBNAIL_MARGIN = 16
+const THUMBNAIL_MSIZE = THUMBNAIL_SIZE + THUMBNAIL_MARGIN
+
+const CB = Math.random().toString(36).slice(2); // Cachebust
+
+const CACHE = {}
+
+async function fetchJson(path) {
+    if (!CACHE[path]) {
+        const promise = await fetch(path)
+        CACHE[path] = await promise.json()
+    }
+    return CACHE[path]
+}
+
+const GALLERY_STATE = {
+    'dirNames': null, // [dirName, ....]
+    'dirIndex': null, // {dirName: numEntries, ....}
+    'totalEntries': -1,
+    'debounceTimeout': null,
+    'lastRenderState': null,
+    'dataSource': null,
+}
+
+async function updateDataSource(itemIndex) {
+    var dirStartIndex = 0
+    for (var dirCursor = GALLERY_STATE.dirNames.length - 1; dirCursor >= 0; dirCursor--) {
+        var dirEntryCount = GALLERY_STATE.dirIndex[GALLERY_STATE.dirNames[dirCursor]]
+        if (itemIndex > dirStartIndex + dirEntryCount) {
+            dirStartIndex += dirEntryCount
+        } else {
+            break
+        }
+    }
+
+    const dirNames = []
+    const entryPromises = []
+    const thumbSrcs = []
+
+    for (var i = dirCursor; i >= Math.max(0, dirCursor - 2); i--) {
+        var dirName = GALLERY_STATE.dirNames[i]
+        dirNames.push(dirName)
+
+        var dirURL = `images/${dirName}/entry_index.json?cb=${CB}`
+        entryPromises.push(fetchJson(dirURL))
+
+        var thumbSrc = `images/${dirName}/thumbnails.jpg?cb=${CB}`
+        thumbSrcs.push(thumbSrc)
+        new Image().src = thumbSrc;
+    }
+
+    const entryIndexes = await Promise.all(entryPromises)
+
+    const dataSourceItems = []
+
+    for (var i = 0; i < entryIndexes.length; i++) {
+        var dirName = dirNames[i]
+        var entryIndex = entryIndexes[i]
+        var thumbSrc = thumbSrcs[i]
+
+        for (var j = entryIndex.length - 1; j >= 0; j--) {
+            var entry = entryIndex[j]
+            var bgCol = j % 10
+            var bgRow = Math.floor(j / 10)
+            var paddingX = bgCol * 2
+            var paddingY = bgRow * 2
+
+            dataSourceItems.push({
+                src: `images/${dirName}/${entry.name}`,
+                width: entry.width,
+                height: entry.height,
+                bgOffsetX: paddingX + bgCol * THUMBNAIL_SIZE,
+                bgOffsetY: paddingY + bgRow * THUMBNAIL_SIZE,
+                thumbSrc: thumbSrc,
+                galleryIndex: dirStartIndex + dataSourceItems.length,
+            })
+        }
+    }
+
+    for (var i = dataSourceItems.length - 1; i >= 0; i--) {
+        GALLERY_STATE.dataSource[dirStartIndex + i] = dataSourceItems[i]
+    }
+
+    return {
+       dirCursor: dirCursor,
+       dirStartIndex: dirStartIndex,
+       dataSourceItems: dataSourceItems,
+    }
+}
+
+
+async function updateGallery() {
+    if (!GALLERY_STATE.dirNames) {return}  // not yet initialized
+
+    const galleryNode = document.getElementById("gallery")
+    const tnColumns = Math.floor(galleryNode.clientWidth / THUMBNAIL_MSIZE)
+    const marginLeft = Math.round((galleryNode.clientWidth - (tnColumns * THUMBNAIL_MSIZE)) / 2)
+
+    const totalRows = Math.ceil(GALLERY_STATE.totalEntries / tnColumns)
+    galleryNode.style.height = (totalRows * THUMBNAIL_MSIZE) + "px"
+
+    const scrollTop = document.documentElement.scrollTop
+    const scrollRow = Math.max(0, Math.floor(scrollTop / THUMBNAIL_MSIZE) - 9)
+    const scrollEntry = scrollRow * tnColumns
+
+    const ds = await updateDataSource(scrollEntry)
+
+    const renderState = ds.dirCursor + ":" + tnColumns + ":" + parseInt(window.innerWidth / 10)
+    if (GALLERY_STATE.lastRenderState == renderState) {
+        return
+    }
+    GALLERY_STATE.lastRenderState = renderState
+
+    var entryRow = 0
+    var entryCol = ds.dirStartIndex % tnColumns
+
+    const dirOffsetTop = Math.round(((ds.dirStartIndex - entryCol) / tnColumns) * THUMBNAIL_MSIZE)
+
+    const thumbnailsHTML = []
+
+    for (var i = 0; i < ds.dataSourceItems.length; i++) {
+        var item = ds.dataSourceItems[i]
+
+        const offsetTop = dirOffsetTop + (entryRow * THUMBNAIL_MSIZE)
+        const offsetLeft = marginLeft + entryCol * THUMBNAIL_MSIZE
+
+        const thumbStyles = [
+            `top: ${offsetTop}px;`,
+            `left: ${offsetLeft}px;`,
+            `background-image: url('${item.thumbSrc}');`,
+            // `background-size: ${THUMBNAIL_SIZE}px ${THUMBNAIL_SIZE}px;`,
+            `background-position: -${item.bgOffsetX}px -${item.bgOffsetY}px;`,
+        ]
+
+        const thumbAttrs = [
+            `href="${item.src}"`,
+            `class="thumbnail"`,
+            `style="${thumbStyles.join(' ')}"`,
+            `-data-gallery-idx="${item.galleryIndex}"`,
+        ]
+
+        // TODO (mb 2024-05-04): maybe add <img>
+        //          and see if the animation works.
+        thumbnailsHTML.push(`<a ${thumbAttrs.join(' ')}></a>`)
+
+        entryCol += 1
+        if (entryCol >= tnColumns) {
+            entryRow += 1
+            entryCol = 0
+        }
+    }
+
+    galleryNode.innerHTML = thumbnailsHTML.join("")
+}
+
+
+async function updateGalleryHandler(evt) {
+    if (!GALLERY_STATE.dirNames) {return}  // not yet initialized
+
+    if (evt.constructor.name == 'PhotoSwipeEvent') {
+        const lookBackIndex = Math.max(lightbox.pswp.currIndex - 30, 0)
+        if (!GALLERY_STATE.dataSource[lookBackIndex]) {
+            await updateDataSource(lookBackIndex)
+        }
+        const lookAheadIndex = Math.min(lightbox.pswp.currIndex + 30, GALLERY_STATE.dataSource.length - 1)
+
+        if (!GALLERY_STATE.dataSource[lookAheadIndex]) {
+            await updateDataSource(lookAheadIndex)
+        }
+    } else {
+        clearTimeout(GALLERY_STATE.debounceTimeout)
+        GALLERY_STATE.debounceTimeout = setTimeout(updateGallery, 150)
+    }
+}
+
+
+async function initGallery() {
+    GALLERY_STATE.dirIndex = await fetchJson("images/dir_index.json")
+    GALLERY_STATE.dirNames = []
+
+    GALLERY_STATE.totalEntries = 0;
+
+    Object.entries(GALLERY_STATE.dirIndex).forEach(([dirName, numEntries]) => {
+      // console.log(`dirName: ${dirName}, numEntries: ${numEntries}`);
+      GALLERY_STATE.totalEntries += numEntries
+      GALLERY_STATE.dirNames.push(dirName)
+    });
+
+    GALLERY_STATE.dirNames.sort()
+    GALLERY_STATE.dataSource = [
+        // {src: '...', width: ..., height: ...},
+    ]
+    GALLERY_STATE.dataSource.length = GALLERY_STATE.totalEntries
+
+    updateGallery()
+}
+
+function galleryClickHandler(evt) {
+    if (!evt.target.classList.contains('thumbnail')) {return}
+    evt.preventDefault()
+
+    const galleryIndex = parseInt(evt.target.getAttribute('-data-gallery-idx'), 10)
+
+    window.lightbox.options.dataSource = GALLERY_STATE.dataSource
+    window.lightbox.loadAndOpen(galleryIndex)
+    return false
+}
+
+function initHandlers() {
+    window.addEventListener('scroll', updateGalleryHandler)
+    window.addEventListener('resize', updateGalleryHandler)
+    window.addEventListener('click', galleryClickHandler)
+}
+
+function initApp() {
+    initGallery()
+    initHandlers()
+}
+initApp()
+
+window.panzerApp = {
+    updateGalleryHandler: updateGalleryHandler
+}
+
+})();
