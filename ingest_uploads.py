@@ -130,6 +130,8 @@ def update_indexes():
 def ingest_uploads():
     uploads = pl.Path("upload").glob("*")
 
+    sorted_uploads = []
+
     for src_fpath in uploads:
         basename, suffix = src_fpath.name.rsplit(".", 1)
         assert suffix in ("jpg", "jpeg", "png")
@@ -138,7 +140,7 @@ def ingest_uploads():
             datestr = src_fpath.name[:10]
             tgt_fname = src_fpath.name
         else:
-            datestr = dt.datetime.now().isoformat()[:13]
+            datestr = dt.datetime.now().isoformat()[:19].replace(":", "")
 
             with src_fpath.open(mode="rb") as fobj:
                 fdata = fobj.read()
@@ -150,7 +152,8 @@ def ingest_uploads():
 
         tgt_fname = tgt_fname.rsplit(".", 1)[0] + ".jpg"
         tgt_fpath = dirpath / tgt_fname
-        print(src_fpath, "->", tgt_fpath)
+
+        print(src_fpath, "->", tgt_fpath, src_fpath.stat().st_mtime)
 
         if suffix == "png":
             with Image.open(src_fpath) as png_img:
@@ -163,6 +166,7 @@ def ingest_uploads():
 
 def main(args: list[str]) -> int:
     ingest_uploads()
+    return
     update_indexes()
     update_thumbnails()
     return 0
