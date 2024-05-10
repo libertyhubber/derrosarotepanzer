@@ -1,0 +1,63 @@
+name: Ingest images from upload/
+run-name: Ingest upload/*.jpg
+on: [push]
+jobs:
+  ingest-uploads:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Job triggered by ${{ github.event_name }} event."
+
+      - run: echo "Repo - ${{ github.repository }} Branch - ${{ github.ref }}."
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Check for jpg uploads
+        id: check_jpg_uploads
+        uses: andstor/file-existence-action@v3
+        with:
+          files: 'upload/*.*'
+
+      - name: Set up Python 3.12
+        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        run: python -m pip install --upgrade pip setuptools wheel 'pillow==10.3.0'
+
+      - name: Ingest uploads
+        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        run: python ingest_uploads.py
+
+      - name: Add images
+        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Add new images
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: "images/*/*/*.jpg"
+          remove: "upload/*.*"
+
+      - name: Add entry indexes
+        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Add updated entry indexes
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: "images/*/*/*.json"
+
+      - name: Add directory index
+        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Add updated directory index
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: "images/*.json"
