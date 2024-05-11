@@ -166,7 +166,6 @@ def ingest_uploads():
 
 def main(args: list[str]) -> int:
     ingest_uploads()
-    return
     update_indexes()
     update_thumbnails()
     return 0
