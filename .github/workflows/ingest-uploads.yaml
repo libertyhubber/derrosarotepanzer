@@ -36,8 +36,7 @@ jobs:
 
       - name: Add updated files
         if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
-        uses: EndBug/add-and-commit@v9
-        used: tefanzweifel/git-auto-commit-action@v5
+        uses: tefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Add images and updated indexes
           commit_user_name: GitHub Actions
