@@ -130,8 +130,6 @@ def update_indexes():
 def ingest_uploads():
     uploads = pl.Path("upload").glob("*")
 
-    sorted_uploads = []
-
     for src_fpath in uploads:
         basename, suffix = src_fpath.name.rsplit(".", 1)
         assert suffix in ("jpg", "jpeg", "png")
@@ -160,6 +158,7 @@ def ingest_uploads():
                 jpg_img = Image.new('RGB', png_img.size)
                 jpg_img.paste(png_img.copy())
                 jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True)
+            src_fpath.unlink()
         else:
             src_fpath.rename(tgt_fpath)
 
