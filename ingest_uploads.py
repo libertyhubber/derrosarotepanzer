@@ -142,7 +142,7 @@ def ingest_uploads():
         if src_fpath.name.startswith("favico"):
             continue
         basename, suffix = src_fpath.name.rsplit(".", 1)
-        assert suffix in ("jpg", "jpeg", "png")
+        assert suffix in ("jpg", "jpeg", "png", "webp"), src_fpath
 
         if match := re.search(r"20[0-9]{2}-[0-1][0-9]-[0-3][0-9]", src_fpath.name):
             datestr = src_fpath.name[:10]
@@ -163,7 +163,7 @@ def ingest_uploads():
 
         print(src_fpath, "->", tgt_fpath, src_fpath.stat().st_mtime)
 
-        if suffix == "png":
+        if suffix in ("png", "webp"):
             with Image.open(src_fpath) as png_img:
                 jpg_img = Image.new('RGB', png_img.size)
                 jpg_img.paste(png_img.copy())
