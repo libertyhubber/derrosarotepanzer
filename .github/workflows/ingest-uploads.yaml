@@ -14,28 +14,37 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Check for jpg uploads
-        id: check_jpg_uploads
-        uses: andstor/file-existence-action@v3
+      - name: Check for image uploads
+        id: check_image_uploads
+        # uses: andstor/file-existence-action@v3
+        uses: tj-actions/glob@v22
         with:
-          files: "upload/*.*, *.jpg, *.jpeg, *.png, images/*.jpg, images/*.jpeg, images/*.png"
+          # files: "upload/*.*, *.jpg, *.jpeg, *.png, images/*.jpg, images/*.jpeg, images/*.png"
+          files: |
+              upload/*.*
+              .jpg
+              .jpeg
+              .png
+              mages/*.jpg
+              mages/*.jpeg
+              images/*.png
 
       - name: Set up Python 3.12
-        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        if: ${{ (steps.check_image_uploads.outputs.paths.length > 0) }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install dependencies
-        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        if: ${{ (steps.check_image_uploads.outputs.paths.length > 0) }}
         run: python -m pip install --upgrade pip setuptools wheel 'pillow==10.3.0'
 
       - name: Ingest uploads
-        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        if: ${{ (steps.check_image_uploads.outputs.paths.length > 0) }}
         run: python ingest_uploads.py
 
       - name: Add updated files
-        if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
+        if: ${{ (steps.check_image_uploads.outputs.paths.length > 0) }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Add images and updated indexes
