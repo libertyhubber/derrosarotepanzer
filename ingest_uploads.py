@@ -128,9 +128,19 @@ def update_indexes():
 
 
 def ingest_uploads():
-    uploads = pl.Path("upload").glob("*")
+    uploads = it.chain(
+        pl.Path("upload").glob("*"),
+        pl.Path("images").glob("*.png"),
+        pl.Path("images").glob("*.jpg"),
+        pl.Path("images").glob("*.jpeg"),
+        pl.Path(".").glob("*.png"),
+        pl.Path(".").glob("*.jpg"),
+        pl.Path(".").glob("*.jpeg"),
+    )
 
     for src_fpath in uploads:
+        if src_fpath.name.startswith("favico"):
+            continue
         basename, suffix = src_fpath.name.rsplit(".", 1)
         assert suffix in ("jpg", "jpeg", "png")
 
