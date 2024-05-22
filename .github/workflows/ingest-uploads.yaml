@@ -18,7 +18,7 @@ jobs:
         id: check_jpg_uploads
         uses: andstor/file-existence-action@v3
         with:
-          files: 'upload/*.*, *.jpg, *.jpeg, images/*.jpg, images/*.jpeg, images/*.png'
+          files: "upload/*.*, *.jpg, *.jpeg, *.png, images/*.jpg, images/*.jpeg, images/*.png"
 
       - name: Set up Python 3.12
         if: ${{ (steps.check_jpg_uploads.outputs.files_exists == 'true') }}
