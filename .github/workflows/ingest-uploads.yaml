@@ -16,17 +16,16 @@ jobs:
 
       - id: has_any_images
         run: |
-          GLOBS=("*.jpg" "*.jpeg" "*.png" "*.webp" "upload/*" "uploads/*" "images/*.jpg" "images/*.jpeg" "images/*.png" "images/*.webp")
+          IMG_FILES=$(ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null)
 
-          IMAGES_UPLOADED=false
+          if echo $IMG_FILES | grep -q .; then
+            IMAGES_UPLOADED=true
+            echo "images found: ${IMG_FILES}"
+          else
+            IMAGES_UPLOADED=false
+          fi
 
-          for GLOB in "${GLOBS[@]}"; do
-            if find . -type f -name "$GLOB" | grep -q .; then
-              IMAGES_UPLOADED=true
-            fi
-          done
-
-          echo "images_uploaded=$IMAGES_UPLOADED" >> $GITHUB_ENV
+          echo $IMAGES_UPLOADED
 
       - name: Set up Python 3.12
         if: env.images_uploaded == 'true'
