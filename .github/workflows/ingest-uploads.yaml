@@ -16,33 +16,28 @@ jobs:
 
       - id: has_any_images
         run: |
-          IMG_FILES=$(ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null)
-
-          if echo $IMG_FILES | grep -q .; then
-            IMAGES_UPLOADED=true
-            echo "images found: ${IMG_FILES}"
+          if ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null | grep -q .; then
+            echo "IMAGES_UPLOADED=true" >> $GITHUB_ENV
           else
-            IMAGES_UPLOADED=false
+            echo "IMAGES_UPLOADED=false" >> $GITHUB_ENV
           fi
 
-          echo $IMAGES_UPLOADED
-
       - name: Set up Python 3.12
-        if: env.images_uploaded == 'true'
+        if: env.has_any_images == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install dependencies
-        if: env.images_uploaded == 'true'
+        if: env.has_any_images == 'true'
         run: python -m pip install --upgrade pip setuptools wheel 'pillow==10.3.0'
 
       - name: Ingest uploads
-        if: env.images_uploaded == 'true'
+        if: env.has_any_images == 'true'
         run: python ingest_uploads.py
 
       - name: Add updated files
-        if: env.images_uploaded == 'true'
+        if: env.has_any_images == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Add images and updated indexes
