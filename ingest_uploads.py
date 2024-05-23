@@ -130,12 +130,15 @@ def update_indexes():
 def ingest_uploads():
     uploads = it.chain(
         pl.Path("upload").glob("*"),
+        pl.Path("uploads").glob("*"),
         pl.Path("images").glob("*.png"),
         pl.Path("images").glob("*.jpg"),
         pl.Path("images").glob("*.jpeg"),
+        pl.Path("images").glob("*.webp"),
         pl.Path(".").glob("*.png"),
         pl.Path(".").glob("*.jpg"),
         pl.Path(".").glob("*.jpeg"),
+        pl.Path(".").glob("*.webp"),
     )
 
     for src_fpath in uploads:

@@ -14,43 +14,40 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Check for image uploads
-        id: check_image_uploads
-        uses: andstor/file-existence-action@v3
-        with:
-          files: "upload/*.*"
-          # files: "upload/*.*, *.jpg, *.jpeg, *.png, images/*.jpg, images/*.jpeg, images/*.png"
-        # uses: tj-actions/glob@v22
-        # with:
-          # files: |
-          #     upload/*.*
-          #     .jpg
-          #     .jpeg
-          #     .png
-          #     mages/*.jpg
-          #     mages/*.jpeg
-          #     images/*.png"
+      - id: has_any_images
+        run: |
+          GLOBS=("*.jpg" "*.jpeg" "*.png" "*.webp" "upload/*" "uploads/*" "images/*.jpg" "images/*.jpeg" "images/*.png" "images/*.webp")
+
+          IMAGES_UPLOADED=false
+
+          for GLOB in "${GLOBS[@]}"; do
+            if find . -type f -name "$GLOB" | grep -q .; then
+              IMAGES_UPLOADED=true
+            fi
+          done
+
+          echo "images_uploaded=$IMAGES_UPLOADED" >> $GITHUB_ENV
 
       - name: Set up Python 3.12
-        if: ${{ (steps.check_image_uploads.outputs.files_exists == 'true') }}
+        if: env.images_uploaded == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install dependencies
-        if: ${{ (steps.check_image_uploads.outputs.files_exists == 'true') }}
+        if: env.images_uploaded == 'true'
         run: python -m pip install --upgrade pip setuptools wheel 'pillow==10.3.0'
 
       - name: Ingest uploads
-        if: ${{ (steps.check_image_uploads.outputs.files_exists == 'true') }}
+        if: env.images_uploaded == 'true'
         run: python ingest_uploads.py
 
       - name: Add updated files
-        if: ${{ (steps.check_image_uploads.outputs.files_exists == 'true') }}
+        if: env.images_uploaded == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Add images and updated indexes
           commit_user_name: GitHub Actions
           commit_user_email: actions@github.com
-          file_pattern: 'upload/*.* images/*.json images/*/*/*.json images/*/*/*.jpg'
+          file_pattern: '*.jpg *.jpeg *.png, *.webp uploads/*.* upload/*.* images/*.* images/*/*/*.json images/*/*/*.jpg'
 
