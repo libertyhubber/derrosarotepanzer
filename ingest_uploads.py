@@ -129,8 +129,10 @@ def update_indexes():
 
 def ingest_uploads():
     uploads = it.chain(
-        pl.Path("upload").glob("*"),
-        pl.Path("uploads").glob("*"),
+        pl.Path("upload").glob("*.png"),
+        pl.Path("upload").glob("*.jpg"),
+        pl.Path("upload").glob("*.jpeg"),
+        pl.Path("upload").glob("*.webp"),
         pl.Path("images").glob("*.png"),
         pl.Path("images").glob("*.jpg"),
         pl.Path("images").glob("*.jpeg"),

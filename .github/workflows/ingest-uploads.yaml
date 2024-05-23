@@ -16,7 +16,7 @@ jobs:
 
       - name: Check Uploads
         run: |
-          if ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null | grep -q .; then
+          if ls -1 *.jpg *.jpeg *.png *.webp upload/*.jpg upload/*.jpeg upload/*.png upload/*.webp images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null | grep -q .; then
             echo "IMAGES_UPLOADED=true" >> $GITHUB_ENV
           else
             echo "IMAGES_UPLOADED=false" >> $GITHUB_ENV
@@ -37,7 +37,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          UPLOADED_FILES=$(ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null || true)
+          UPLOADED_FILES=$(ls -1 *.jpg *.jpeg *.png *.webp upload/*.jpg upload/*.jpeg upload/*.png upload/*.webp images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null || true)
+
           python ingest_uploads.py
           git add $(ls -1 images/*.json images/*/*/*.json images/*/*/*.jpg 2>/dev/null)
           git rm $UPLOADED_FILES
