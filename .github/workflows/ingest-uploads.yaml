@@ -34,14 +34,8 @@ jobs:
 
       - name: Ingest uploads
         if: env.IMAGES_UPLOADED == 'true'
-        run: python ingest_uploads.py
-
-      - name: Add updated files
-        if: env.IMAGES_UPLOADED == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Add images and updated indexes
-          commit_user_name: GitHub Actions
-          commit_user_email: actions@github.com
-          file_pattern: '*.jpg *.jpeg *.png, *.webp uploads/*.* upload/*.* images/*.* images/*/*/*.json images/*/*/*.jpg'
-
+        run: |
+          python ingest_uploads.py
+          git add $(ls -1 images/*.json images/*/*/*.json images/*/*/*.jpg 2>/dev/null)
+          git rm $(ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null)
+          GIT_AUTHOR_NAME="GitHub Actions" GIT_AUTHOR_EMAIL="actions@github.com" git commit -m "Add images and update indexes"
