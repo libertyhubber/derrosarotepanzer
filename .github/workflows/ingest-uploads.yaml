@@ -37,5 +37,5 @@ jobs:
         run: |
           python ingest_uploads.py
           git add $(ls -1 images/*.json images/*/*/*.json images/*/*/*.jpg 2>/dev/null)
-          git rm -f $(ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null)
+          git rm --force --cached $(ls -1 *.jpg *.jpeg *.png *.webp upload/* uploads/* images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null)
           GIT_AUTHOR_NAME="GitHub Actions" GIT_AUTHOR_EMAIL="actions@github.com" git commit -m "Add images and update indexes"
