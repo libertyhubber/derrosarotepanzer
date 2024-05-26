@@ -8,6 +8,7 @@ import json
 import hashlib
 import pathlib as pl
 import itertools as it
+import subprocess as sp
 import collections
 import datetime as dt
 from PIL import Image
@@ -163,14 +164,18 @@ def ingest_uploads():
 
         print(src_fpath, "->", tgt_fpath, src_fpath.stat().st_mtime)
 
-        if suffix in ("png", "webp"):
+        if suffix.lower() in ("png", "webp"):
             with Image.open(src_fpath) as png_img:
                 jpg_img = Image.new('RGB', png_img.size)
                 jpg_img.paste(png_img.copy())
                 jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True)
+                sp.call(["git", "add", jpg_img])
             src_fpath.unlink()
+            sp.call(["git", "rm", src_fpath])
         else:
             src_fpath.rename(tgt_fpath)
+            sp.call(["git", "add", tgt_fpath])
+            sp.call(["git", "rm", src_fpath])
 
 
 def main(args: list[str]) -> int:

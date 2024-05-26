@@ -37,13 +37,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          UPLOADED_FILES=$(ls -1 *.jpg *.jpeg *.png *.webp upload/*.jpg upload/*.jpeg upload/*.png upload/*.webp images/*.jpg images/*.jpeg images/*.png images/*.webp 2>/dev/null || true)
-
-          python ingest_uploads.py
-          git add $(ls -1 images/*.json images/*/*/*.json images/*/*/*.jpg 2>/dev/null)
-          git rm $UPLOADED_FILES
-
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+
+          python ingest_uploads.py
+
           git commit -m "Add images and update indexes"
           git push
