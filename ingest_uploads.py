@@ -128,26 +128,21 @@ def update_indexes():
 
 
 def ingest_uploads():
-    uploads = it.chain(
-        pl.Path("upload").glob("*.png"),
-        pl.Path("upload").glob("*.jpg"),
-        pl.Path("upload").glob("*.jpeg"),
-        pl.Path("upload").glob("*.webp"),
-        pl.Path("images").glob("*.png"),
-        pl.Path("images").glob("*.jpg"),
-        pl.Path("images").glob("*.jpeg"),
-        pl.Path("images").glob("*.webp"),
-        pl.Path(".").glob("*.png"),
-        pl.Path(".").glob("*.jpg"),
-        pl.Path(".").glob("*.jpeg"),
-        pl.Path(".").glob("*.webp"),
-    )
+    extensions = ("jpg", "jpeg", "png", "webp")
+    directories = (".", "images", "upload")
 
-    for src_fpath in uploads:
-        if src_fpath.name.startswith("favico"):
-            continue
+    upload_paths = []
+
+    for directory in directories:
+        for fpath in pl.Path(directory).glob("*.*"):
+            basename, suffix = fpath.name.rsplit(".", 1)
+            if basename.startswith("favico"):
+                continue
+            if suffix.lower() in extensions:
+                upload_paths.append(fpath)
+
+    for src_fpath in upload_paths:
         basename, suffix = src_fpath.name.rsplit(".", 1)
-        assert suffix in ("jpg", "jpeg", "png", "webp"), src_fpath
 
         if match := re.search(r"20[0-9]{2}-[0-1][0-9]-[0-3][0-9]", src_fpath.name):
             datestr = src_fpath.name[:10]
