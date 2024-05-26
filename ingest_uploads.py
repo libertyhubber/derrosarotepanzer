@@ -169,13 +169,12 @@ def ingest_uploads():
                 jpg_img = Image.new('RGB', png_img.size)
                 jpg_img.paste(png_img.copy())
                 jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True)
-                sp.call(["git", "add", jpg_img])
             src_fpath.unlink()
-            sp.call(["git", "rm", str(src_fpath.absolute())])
         else:
             src_fpath.rename(tgt_fpath)
-            sp.call(["git", "add", str(tgt_fpath.absolute())])
-            sp.call(["git", "rm", str(src_fpath.absolute())])
+
+        sp.call(["git", "add", str(tgt_fpath.absolute())])
+        sp.call(["git", "rm", str(src_fpath.absolute())])
 
 
 def main(args: list[str]) -> int:
