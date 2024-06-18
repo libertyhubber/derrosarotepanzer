@@ -32,12 +32,12 @@
 
 
 <div id="top-nav">
-    <a href="/index.html" class="active">MEMES</a>
-    <a href="/media.html">MEDIEN</a>
+    <a href="/index.html">MEMES</a>
+    <a href="/media.html" class="active">MEDIEN</a>
 </div>
 
 
-<div id="gallery"></div>
+<div id="media"></div>
 
 
 <div id="crypto"></div>
@@ -54,23 +54,7 @@
    Some images from <a class="mobilelink" target="_blank" href="http://icons8.com/">icons8.com</a>.
 </div>
 
-
-<script type="module">
-import PhotoSwipeLightbox from '/assets/photoswipe-lightbox.esm.js';
-
-const lightbox = new PhotoSwipeLightbox({
-  pswpModule: () => import('/assets/photoswipe.esm.js'),
-  loop: false,
-})
-lightbox.on('change', panzerApp.updateGalleryHandler)
-lightbox.init()
-window.lightbox = lightbox
-</script>
-
-<script type="text/javascript" src="/assets/app.js?cb=11"></script>
-
-<link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/assets/photoswipe.css">
-
+ 
 
 <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/assets/icons.css" />
 </body>
