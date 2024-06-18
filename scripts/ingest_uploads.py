@@ -60,7 +60,7 @@ def update_thumbnails():
 
                 thumbnails_image.paste(img.copy(), (offset_x + entry['x'], offset_y + entry['y']))
 
-        thumbnails_image.save(str(thumbnails_path), "JPEG", quality=65, optimize=True)
+        thumbnails_image.save(str(thumbnails_path), "JPEG", quality=75, optimize=True, progressive=True)
 
 
 def update_indexes():
@@ -177,7 +177,7 @@ def ingest_uploads():
             with Image.open(src_fpath) as png_img:
                 jpg_img = Image.new('RGB', png_img.size)
                 jpg_img.paste(png_img.copy())
-                jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True)
+                jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True, progressive=True)
             src_fpath.unlink()
         else:
             src_fpath.rename(tgt_fpath)

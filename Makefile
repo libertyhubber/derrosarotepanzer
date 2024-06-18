@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -O extglob -eo pipefail -c
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := html
 .SUFFIXES:
 
 index.html: templates/*
@@ -17,5 +17,5 @@ debug_ingest:
 	ls -lh images/2024/*/thumbnails.jpg
 
 
-.PHONY: all
-all: index.html media.html
+.PHONY: html
+html: index.html media.html
