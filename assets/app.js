@@ -4,7 +4,8 @@ const THUMBNAIL_SIZE = 150
 const THUMBNAIL_MARGIN = 16
 const THUMBNAIL_MSIZE = THUMBNAIL_SIZE + THUMBNAIL_MARGIN
 
-const CB = Math.random().toString(36).slice(2); // Cachebust
+// const CB = Math.random().toString(36).slice(2); // Cachebust
+const CB = parseInt(+new Date() / (1000 * 3600)).toString(36)
 
 const CACHE = {}
 
@@ -25,7 +26,8 @@ const GALLERY_STATE = {
     'dataSource': null,
 }
 
-async function updateDataSource(itemIndex) {
+async function updateDataSources(itemIndex) {
+    // scan through directories
     var dirStartIndex = 0
     for (var dirCursor = GALLERY_STATE.dirNames.length - 1; dirCursor >= 0; dirCursor--) {
         var dirEntryCount = GALLERY_STATE.dirIndex[GALLERY_STATE.dirNames[dirCursor]]
@@ -40,7 +42,7 @@ async function updateDataSource(itemIndex) {
     const entryPromises = []
     const thumbSrcs = []
 
-    for (var i = dirCursor; i >= Math.max(0, dirCursor - 2); i--) {
+    for (var i = dirCursor; i >= Math.max(0, dirCursor - 1); i--) {
         var dirName = GALLERY_STATE.dirNames[i]
         dirNames.push(dirName)
 
@@ -49,6 +51,7 @@ async function updateDataSource(itemIndex) {
 
         var thumbSrc = `images/${dirName}/thumbnails.jpg?cb=${CB}`
         thumbSrcs.push(thumbSrc)
+
         new Image().src = thumbSrc;
     }
 
@@ -63,17 +66,12 @@ async function updateDataSource(itemIndex) {
 
         for (var j = entryIndex.length - 1; j >= 0; j--) {
             var entry = entryIndex[j]
-            var bgCol = j % 10
-            var bgRow = Math.floor(j / 10)
-            var paddingX = bgCol * 2
-            var paddingY = bgRow * 2
-
             dataSourceItems.push({
                 src: `images/${dirName}/${entry.name}`,
-                width: entry.width,
-                height: entry.height,
-                bgOffsetX: paddingX + bgCol * THUMBNAIL_SIZE,
-                bgOffsetY: paddingY + bgRow * THUMBNAIL_SIZE,
+                width: entry.w,
+                height: entry.h,
+                bgOffsetX: entry.x,
+                bgOffsetY: entry.y,
                 thumbSrc: thumbSrc,
                 galleryIndex: dirStartIndex + dataSourceItems.length,
             })
@@ -96,6 +94,7 @@ async function updateGallery() {
     if (!GALLERY_STATE.dirNames) {return}  // not yet initialized
 
     const galleryNode = document.getElementById("gallery")
+
     const tnColumns = Math.floor(galleryNode.clientWidth / THUMBNAIL_MSIZE)
     const marginLeft = Math.round((galleryNode.clientWidth - (tnColumns * THUMBNAIL_MSIZE)) / 2)
 
@@ -106,12 +105,18 @@ async function updateGallery() {
     const scrollRow = Math.max(0, Math.floor(scrollTop / THUMBNAIL_MSIZE) - 9)
     const scrollEntry = scrollRow * tnColumns
 
-    const ds = await updateDataSource(scrollEntry)
+    const ds = await updateDataSources(scrollEntry)
 
     const renderState = ds.dirCursor + ":" + tnColumns + ":" + parseInt(window.innerWidth / 10)
+
     if (GALLERY_STATE.lastRenderState == renderState) {
         return
     }
+
+    const node = document.getElementById("nav-container")
+    node.style.display = ""
+    node.style.top = ""
+
     GALLERY_STATE.lastRenderState = renderState
 
     var entryRow = 0
@@ -163,12 +168,12 @@ async function updateGalleryHandler(evt) {
     if (evt.constructor.name == 'PhotoSwipeEvent') {
         const lookBackIndex = Math.max(lightbox.pswp.currIndex - 30, 0)
         if (!GALLERY_STATE.dataSource[lookBackIndex]) {
-            await updateDataSource(lookBackIndex)
+            await updateDataSources(lookBackIndex)
         }
         const lookAheadIndex = Math.min(lightbox.pswp.currIndex + 30, GALLERY_STATE.dataSource.length - 1)
 
         if (!GALLERY_STATE.dataSource[lookAheadIndex]) {
-            await updateDataSource(lookAheadIndex)
+            await updateDataSources(lookAheadIndex)
         }
     } else {
         clearTimeout(GALLERY_STATE.debounceTimeout)
@@ -209,10 +214,26 @@ function galleryClickHandler(evt) {
     return false
 }
 
+function burgerMenuClickHandler(evt) {
+    if (!evt.target.classList.contains('burger-button')) {return}
+    evt.preventDefault()
+
+    const node = document.getElementById("nav-container")
+    if (node.style.display == 'block') {
+        node.style.display = "none"
+    } else {
+        node.style.top = parseInt(window.scrollY) + "px"
+        node.style.display = "block"
+    }
+
+    return false
+}
+
 function initHandlers() {
     window.addEventListener('scroll', updateGalleryHandler)
     window.addEventListener('resize', updateGalleryHandler)
     window.addEventListener('click', galleryClickHandler)
+    window.addEventListener('click', burgerMenuClickHandler)
 }
 
 function initApp() {

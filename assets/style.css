@@ -16,6 +16,7 @@ a {color: unset;}
 
 /* global styles */
 body {
+	color: white;
 	background: black;
 	font-family: sans-serif;
 	overflow-y: scroll;
@@ -25,36 +26,52 @@ body {
 /* element styles */
 
 .nav {
-	position: fixed;
-	top: 20px;
     width: 15em;
 }
 
-
-.nav.supports {
-	left: calc(100vw / 2 + 830px - 26em);
-}
-.nav.socials {
-	right: calc(100vw / 2 + 830px - 26em);
+.burger-button {
+	display: none;
 }
 
-@media screen and (max-width: 1360px) {
-	.nav.supports {right: 0; left: unset; }
-	.nav.socials {left: 0; right: unset; }
+.container {
+	margin: 0 auto;
+	max-width: 1080px;
+}
+#nav-container {
+	margin-top: 2.5em;
+	float: left;
+}
+
+#top-nav,
+#gallery {
+	float: right;
+    margin: 0 auto 2rem auto;
+    width: calc(100% - 240px);
+    position: relative;
+    text-align: center;
 }
 
 .nav a {
-	display: inline-block;
-	margin: .2em 0;
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 40px;
+	margin: .5em 0;
 	color: white;
 	text-decoration: none;
 	font-size: 0.9em;
 	font-weight: bold;
-	text-align: center;
 	width: 16em;
 }
 
+.nav.socials a span {
+	display: inline-block;
+    position: absolute;
+    left: 50px;
+    vertical-align: middle;
+}
 
+.icon.burger::before,
 .nav .support::before,
 .nav .support::after,
 .nav .social::before {
@@ -63,43 +80,68 @@ body {
     background-size: 100%;
 }
 
-.nav .support::before,
 .nav .social::before {
 	content: "";
-    display: block;
-    width: 50px;
-    height: 50px;
-    margin: 10px auto;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
     filter: invert(94%) sepia(88%) saturate(4055%) hue-rotate(276deg) brightness(102%) contrast(104%);
+    position: relative;
+    left: 5px;
 }
+
 .nav .support {
 	position: relative;
-	height: 140px;
+	height: 125px;
+	margin: 3em 3em;
 }
-.nav .support::before {
-    position: absolute;
-    left: 20px;
-    top: 30px;
-    width: 50px;
-    height: 50px;
-}
+
 .nav .support::after {
 	content: "";
-    display: block;
-    width: 130px;
-    height: 130px;
     position: absolute;
-    right: 20px;
-    top: 0;
+    left: 53px;
+    top: 53px;
+    width: 30px;
+    height: 30px;
 
-    border: 5px solid white;
+    filter: contrast(1);
+    background: #FAE;
+    border-radius: 20px;
+}
+.nav .support::before {
+	content: "";
+    display: block;
+    width: 140px;
+    height: 140px;
+    position: absolute;
+    image-rendering: pixelated;
+
+    border: 6px solid white;
 }
 
-#gallery {
-    margin: 0 auto;
-    width: calc(100% - 32em);
-    max-width: 830px;
-    position: relative;
+#top-nav {
+	border-bottom: 3px solid #333;
+	display: none;
+}
+
+#top-nav a {
+	font-size: 1.2em;
+	font-weight: bold;
+	text-decoration: none;
+
+	width: 47%;
+	display: inline-block;
+	text-align: center;
+	padding: 0.5rem 0;
+	margin: 0 3px;
+}
+
+#top-nav a.active {
+	background: #333;
+}
+
+#top-nav a:hover {
+	background: #444;
 }
 
 .thumbnail {
@@ -121,7 +163,7 @@ body {
 	font-size: 0.8em;
 	position: fixed;
     bottom: 0px;
-    right: 0px;
+    left: calc(50vw - 480px);
     width: 13em;
     padding: 8px;
     opacity: 0.5;
@@ -135,37 +177,46 @@ body {
     opacity: 1.0;
 }
 
-.nav.mobile,
 .footer.mobile {
 	display: none;
 }
 
-@media screen and (max-width: 1020px) {
+@media screen and (max-width: 1010px) {
+	.burger-button {
+		display: block;
+		position: fixed;
+		top: 8px;
+		left: 8px;
+		background: black;
+		border-radius: 8px;
+		cursor: pointer;
+	}
+	.icon.burger::before {
+		content: "";
+		height: 48px;
+		width: 48px;
+		display: block;
+	}
 	#gallery {
-		width: calc(min(100%, 830px));
+		width: 100%;
 		margin: 0 auto;
+	}
+	#top-nav {
+		width: calc(min(100%, 830px));
+	    margin: 0 auto 2rem auto;
 	}
 	.footer.wide {
 		display: none;
 	}
-	.footer.mobile {
-		display: block;
-		width: 100%;
-		opacity: .8;
-	    transition: bottom 500ms;
-	}
 	.nav.hide {
 		top: -8em;
 	}
-	.footer.mobile.hide {
-		bottom: -4em;
-	}
-	.nav.mobile.supports,
-	.nav.mobile.socials {
-		display: block;
-	}
-	.nav.desktop.supports,
-	.nav.desktop.socials {
+	#nav-container {
 		display: none;
+		position: absolute;
+		margin-top: 0;
+		left: 60px;
+		background: black;
 	}
+
 }

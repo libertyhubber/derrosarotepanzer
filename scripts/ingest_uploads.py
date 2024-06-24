@@ -14,6 +14,9 @@ import datetime as dt
 from PIL import Image
 
 
+DEBUG_ENTRY_INDEX = True
+
+
 THUMBNAIL_SIZE = 150
 
 
@@ -33,35 +36,31 @@ def update_thumbnails():
 
         print("updating thumbnails", thumbnails_path)
         num_cols = 10
-        num_rows = len(entry_index) // 10
+        num_rows = len(entry_index) // num_cols
 
         padding_x = num_cols * 2
         padding_y = num_rows * 2
 
-        thumbnails_width = THUMBNAIL_SIZE * 10 + padding_x
+        thumbnails_width = THUMBNAIL_SIZE * num_cols + padding_x
         thumbnails_height = THUMBNAIL_SIZE * (num_rows + 1) + padding_y
 
         thumbnails_image = Image.new('RGB', (thumbnails_width, thumbnails_height))
         for i, entry in enumerate(entry_index):
-            column = i % 10
-            row = i // 10
-            padding_x = column * 2
-            padding_y = row * 2
-            offset_x = padding_x + column * THUMBNAIL_SIZE
-            offset_y = padding_y + row * THUMBNAIL_SIZE
-
             img_path = dirpath / entry['name']
             with Image.open(img_path) as img:
                 img.thumbnail((THUMBNAIL_SIZE, THUMBNAIL_SIZE))
-                img_width, img_height = img.size
-                if img_width > img_height:
-                    offset_y += (THUMBNAIL_SIZE - img_height) // 2
+                thumb_width, thumb_height = img.size
+
+                if entry['w'] > entry['h']:
+                    offset_x = 0
+                    offset_y = (THUMBNAIL_SIZE - thumb_height) // 2
                 else:
-                    offset_x += (THUMBNAIL_SIZE - img_width) // 2
+                    offset_x = (THUMBNAIL_SIZE - thumb_width) // 2
+                    offset_y = 0
 
-                thumbnails_image.paste(img.copy(), (offset_x, offset_y))
+                thumbnails_image.paste(img.copy(), (offset_x + entry['x'], offset_y + entry['y']))
 
-        thumbnails_image.save(str(thumbnails_path), "JPEG", quality=70, optimize=True)
+        thumbnails_image.save(str(thumbnails_path), "JPEG", quality=75, optimize=True, progressive=True)
 
 
 def update_indexes():
@@ -104,17 +103,26 @@ def update_indexes():
         new_entry_index = []
         old_entries = {entry['name']: entry for entry in old_entry_index}
 
-        for img_path in img_paths:
-            if img_path.name in old_entries:
+        for i, img_path in enumerate(reversed(img_paths)):
+            column = i % 10
+            row = i // 10
+            padding_x = column * 2
+            padding_y = row * 2
+            offset_x = padding_x + THUMBNAIL_SIZE * column
+            offset_y = padding_y + THUMBNAIL_SIZE * row
+
+            if not DEBUG_ENTRY_INDEX and img_path.name in old_entries:
                 new_entry_index.append(old_entries[img_path.name])
             else:
                 with Image.open(img_path) as img:
                     img_width, img_height = img.size
 
                 new_entry_index.append({
-                    'name'  : img_path.name,
-                    'width' : img_width,
-                    'height': img_height,
+                    'x': offset_x,
+                    'y': offset_y,
+                    'w': img_width,
+                    'h': img_height,
+                    'name': img_path.name,
                 })
 
         new_entry_index.sort(key=lambda e: e['name'])
@@ -124,6 +132,7 @@ def update_indexes():
                 .encode("utf-8")
         )
         if old_entry_index_data != new_entry_index_data:
+            print("updating index   ", entry_index_path)
             with entry_index_path.open('wb') as fobj:
                 fobj.write(new_entry_index_data)
 
@@ -168,7 +177,7 @@ def ingest_uploads():
             with Image.open(src_fpath) as png_img:
                 jpg_img = Image.new('RGB', png_img.size)
                 jpg_img.paste(png_img.copy())
-                jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True)
+                jpg_img.save(tgt_fpath, "JPEG", quality=95, optimize=True, progressive=True)
             src_fpath.unlink()
         else:
             src_fpath.rename(tgt_fpath)
