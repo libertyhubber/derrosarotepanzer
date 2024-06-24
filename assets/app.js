@@ -113,6 +113,10 @@ async function updateGallery() {
         return
     }
 
+    const node = document.getElementById("nav-container")
+    node.style.display = ""
+    node.style.top = ""
+
     GALLERY_STATE.lastRenderState = renderState
 
     var entryRow = 0
@@ -210,10 +214,26 @@ function galleryClickHandler(evt) {
     return false
 }
 
+function burgerMenuClickHandler(evt) {
+    if (!evt.target.classList.contains('burger-button')) {return}
+    evt.preventDefault()
+
+    const node = document.getElementById("nav-container")
+    if (node.style.display == 'block') {
+        node.style.display = "none"
+    } else {
+        node.style.top = parseInt(window.scrollY) + "px"
+        node.style.display = "block"
+    }
+
+    return false
+}
+
 function initHandlers() {
     window.addEventListener('scroll', updateGalleryHandler)
     window.addEventListener('resize', updateGalleryHandler)
     window.addEventListener('click', galleryClickHandler)
+    window.addEventListener('click', burgerMenuClickHandler)
 }
 
 function initApp() {
