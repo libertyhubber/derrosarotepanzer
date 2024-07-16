@@ -9,6 +9,9 @@ index.html: templates/*
 media.html: templates/*
 	python3 scripts/gen_html.py media.html
 
+.PHONY: html
+html: index.html media.html
+
 .PHONY: debug_ingest
 debug_ingest:
 # 	touch images/*/*/*.json
@@ -16,6 +19,6 @@ debug_ingest:
 	python3 scripts/ingest_uploads.py
 	ls -lh images/2024/*/thumbnails.jpg
 
-
-.PHONY: html
-html: index.html media.html
+.PHONY: serve
+serve:
+	python3 -m http.server 8080
