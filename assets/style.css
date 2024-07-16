@@ -51,7 +51,6 @@ body {
 }
 
 #top-nav .nav.socials {
-	right: calc(50vw - 8em);
 	min-width: 16em;
 }
 
@@ -208,7 +207,6 @@ body {
 	margin: 1em auto;
 	width: 600px;
 	max-width: 100%;
-	min-height: 185px;
 }
 
 .banner img {
@@ -216,6 +214,7 @@ body {
 	border-radius: 8px;
 	transition: all 300ms;
 	transition-property: border-color, filter;
+	aspect-ratio: 1024:305;
 }
 .banner img:hover {
 	border-color: #FFF;
@@ -242,4 +241,8 @@ body {
 	#top-nav > span.active,
 		background: #333;
 	}
+	#top-nav .nav.socials {
+		right: calc(50vw - 8em);
+	}
+
 }
