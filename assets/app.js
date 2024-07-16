@@ -219,7 +219,9 @@ function navClickHandler(evt) {
         } else {
             evt.target.classList.add('active')
         }
-        return false
+    } else {
+        const node = document.querySelector(".socials.active")
+        node && node.classList.remove('active')
     }
     if (evt.target.classList.contains('support')) {
         if (evt.target.classList.contains('active')) {
@@ -227,8 +229,11 @@ function navClickHandler(evt) {
         } else {
             evt.target.classList.add('active')
         }
-        return false
+    } else {
+        const node = document.querySelector(".support.active")
+        node && node.classList.remove('active')
     }
+    return false
 }
 
 function initHandlers() {

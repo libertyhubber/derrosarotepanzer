@@ -55,14 +55,7 @@ body {
 }
 
 #top-nav .nav.supports {
-	right: 8px;
 	min-width: 16em;
-}
-
-
-#top-nav > .socials:hover .nav.socials,
-#top-nav > .support:hover .nav.supports {
-	display: block;
 }
 
 .nav {
@@ -222,6 +215,13 @@ body {
 }
 
 
+@media screen and (min-width: 1009px) {
+	#top-nav > .socials:hover .nav.socials,
+	#top-nav > .support:hover .nav.supports {
+		display: block;
+	}
+}
+
 @media screen and (max-width: 1010px) {
 	#gallery {
 		width: 100%;
@@ -235,14 +235,19 @@ body {
 		top: -8em;
 	}
 	#top-nav > .socials.active .nav.socials,
-	#top-nav > .support.active .nav.supports,
+	#top-nav > .support.active .nav.supports {
 		display: block;
+	}
+	#top-nav .nav.supports {
+		right: 8px;
 	}
 	#top-nav > span.active,
 		background: #333;
 	}
+}
+
+@media screen and (max-width: 500px) {
 	#top-nav .nav.socials {
 		right: calc(50vw - 8em);
 	}
-
 }
