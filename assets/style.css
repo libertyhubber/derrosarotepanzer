@@ -45,10 +45,21 @@ body {
 #top-nav .nav.supports {
 	position: absolute;
 	background: #444;
-	width: 32%;
+	width: 30%;
 	top: 40px;
 	display: none;
 }
+
+#top-nav .nav.socials {
+	right: calc(50vw - 8em);
+	min-width: 16em;
+}
+
+#top-nav .nav.supports {
+	right: 8px;
+	min-width: 16em;
+}
+
 
 #top-nav > .socials:hover .nav.socials,
 #top-nav > .support:hover .nav.supports {
@@ -135,7 +146,7 @@ body {
 #top-nav > span,
 #top-nav > a {
 	height: 40px;
-	width: 32%;
+	width: 30%;
 	display: flex;
 
 	font-size: 1.2em;
