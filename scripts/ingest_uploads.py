@@ -5,7 +5,7 @@ import io
 import re
 import sys
 import json
-import hashlib
+import hashlib as hl
 import pathlib as pl
 import itertools as it
 import subprocess as sp
@@ -158,11 +158,11 @@ def ingest_uploads():
             datestr = src_fpath.name[:10]
             tgt_fname = src_fpath.name
         else:
-            datestr = dt.datetime.now().isoformat()[:19].replace(":", "")
+            datestr = dt.datetime.now().isoformat().replace(":", "")[:17]
 
             with src_fpath.open(mode="rb") as fobj:
                 fdata = fobj.read()
-                digest = hashlib.sha256(fdata).hexdigest()[:15]
+                digest = hl.sha256(fdata).hexdigest()[:15]
             tgt_fname = datestr + "_" + digest + src_fpath.name
 
         dirpath = pl.Path("images") / datestr.split("-")[0] / datestr.split("-")[1]

@@ -50,12 +50,9 @@ body {
 	display: none;
 }
 
+#top-nav .nav.supports,
 #top-nav .nav.socials {
-	min-width: 16em;
-}
-
-#top-nav .nav.supports {
-	min-width: 16em;
+	min-width: 15em;
 }
 
 .nav {
@@ -104,8 +101,8 @@ body {
 
 .nav .support {
 	position: relative;
-	height: 125px;
-	margin: 0 0 3em 4em;
+	height: 140px;
+	margin: 0 3em 2em 3em;
 }
 
 .nav .support::after {
