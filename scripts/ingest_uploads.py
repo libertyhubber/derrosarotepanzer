@@ -165,7 +165,10 @@ def ingest_uploads():
                 digest = hl.sha256(fdata).hexdigest()[:15]
             tgt_fname = datestr + "_" + digest + src_fpath.name
 
-        dirpath = pl.Path("images") / datestr.split("-")[0] / datestr.split("-")[1]
+        year = datestr[0:4]
+        month = datestr.replace("-", "")[4:6]
+        assert year.isdigit() and month.isdigit(), (datestr, year, month)
+        dirpath = pl.Path("images") / year / month
         dirpath.mkdir(parents=True, exist_ok=True)
 
         tgt_fname = tgt_fname.rsplit(".", 1)[0] + ".jpg"
