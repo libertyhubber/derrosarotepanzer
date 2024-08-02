@@ -161,8 +161,7 @@ def ingest_uploads():
             datestr = dt.datetime.now().isoformat().replace(":", "")[:17]
 
             with src_fpath.open(mode="rb") as fobj:
-                fdata = fobj.read()
-                digest = hl.sha256(fdata).hexdigest()[:15]
+                digest = hl.sha256(fobj.read()).hexdigest()[:15]
             tgt_fname = datestr + "_" + digest + src_fpath.name
 
         dirpath = pl.Path("images") / datestr.split("-")[0] / datestr.split("-")[1]

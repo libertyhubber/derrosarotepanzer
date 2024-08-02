@@ -12,6 +12,10 @@ media.html: templates/*
 .PHONY: html
 html: index.html media.html
 
+.PHONY: sync_telegram
+sync_telegram:
+	python3 scripts/panzer_imgsync.py
+
 .PHONY: debug_ingest
 debug_ingest:
 # 	touch images/*/*/*.json
