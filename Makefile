@@ -12,9 +12,11 @@ media.html: templates/*
 .PHONY: html
 html: index.html media.html
 
-.PHONY: sync_telegram
-sync_telegram:
+.PHONY: sync_and_ingest
+sync_and_ingest:
 	python3 scripts/panzer_imgsync.py
+	python3 scripts/ingest_uploads.py
+
 
 .PHONY: debug_ingest
 debug_ingest:

@@ -137,6 +137,20 @@ def update_indexes():
                 fobj.write(new_entry_index_data)
 
 
+def mk_datestr(datestr=None):
+    if datestr is None:
+        datestr = dt.datetime.now().isoformat()
+        return datestr.replace("-", "").replace(":", "")[:15]
+
+    datestr = datestr.replace("-", "").replace(":", "")[:15]
+    if not datestr[0:4].isdigit() or not datestr[4:6].isdigit():
+        datestr = dt.datetime.now().isoformat()
+        datestr = datestr.replace("-", "").replace(":", "")[:15]
+
+    return datestr
+
+
+
 def ingest_uploads():
     extensions = ("jpg", "jpeg", "png", "webp")
     directories = (".", "images", "upload")
@@ -155,18 +169,18 @@ def ingest_uploads():
         basename, suffix = src_fpath.name.rsplit(".", 1)
 
         if match := re.search(r"20[0-9]{2}-[0-1][0-9]-[0-3][0-9]", src_fpath.name):
-            datestr = src_fpath.name[:10]
+            datestr = mk_datestr(src_fpath.name[:10])
             tgt_fname = src_fpath.name
         else:
-            datestr = dt.datetime.now().isoformat().replace(":", "")[:17]
+            datestr = mk_datestr()
 
             with src_fpath.open(mode="rb") as fobj:
                 digest = hl.sha256(fobj.read()).hexdigest()[:15]
             tgt_fname = datestr + "_" + digest + src_fpath.name
 
         year = datestr[0:4]
-        month = datestr.replace("-", "")[4:6]
-        assert year.isdigit() and month.isdigit(), (datestr, year, month)
+        month = datestr[4:6]
+
         dirpath = pl.Path("images") / year / month
         dirpath.mkdir(parents=True, exist_ok=True)
 

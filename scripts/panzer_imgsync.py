@@ -65,9 +65,13 @@ def load_last_messages() -> dict[int, dict]:
 
 def dump_messages(messages: dict[int, dict]) -> None:
     """Dump messages to the cache file with pretty printing."""
+    msg_text = json.dumps(messages, sort_keys=True)
+    msg_text = msg_text.replace('}, "', '},\n"')
+    msg_data = msg_text.encode("utf-8")
+
     tmp_path = MESSAGES_CACHE_PATH.parent / (MESSAGES_CACHE_PATH.name + ".tmp")
-    with tmp_path.open(mode='w') as fobj:
-        json.dump(messages, fobj, indent=1, sort_keys=True)
+    with tmp_path.open(mode="wb") as fobj:
+        fobj.write(msg_data)
 
     tmp_path.rename(MESSAGES_CACHE_PATH)
 
@@ -111,6 +115,15 @@ def test_fingerprint_image():
 test_fingerprint_image()
 
 
+def _parse_date(date_str):
+    date_str = date_str.replace("-", "")
+    yyyy, mm, dd = date_str[0:4], date_str[4:6], date_str[6:8]
+    return dt.date(int(yyyy, base=10), int(mm, base=10), int(dd, base=10))
+
+
+assert _parse_date("2024-09-30") == dt.date(2024, 9, 30)
+
+
 async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
     # Getting information about yourself
     me = await client.get_me()
@@ -123,25 +136,39 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
         lookback = 20      # so we update the fwd and rct fields
         min_id = max(map(int, old_messages.keys())) - lookback
 
-    limit = 50
+    limit = 100
 
     new_messages = copy.deepcopy(old_messages)
 
     fpaths = reversed(sorted(IMAGES_DIR.rglob("*.jpg")))
 
-    # used to prevent duplicate uploads by find existing images based on digest
+    # Used to prevent duplicate uploads.
+    # files must have the same digest and have a date,
+    #   within 3 days of each other
     digest_paths = {}
     for fpath in fpaths:
         if fpath.name == "thumbnails.jpg":
             continue
 
+        date = _parse_date(fpath.name)
+
         with fpath.open(mode='rb') as fobj:
             data = fobj.read()
             digest = digest_img(data)
-            assert digest not in digest_paths, (digest, digest_paths[digest], fpath.name)
-            digest_paths[digest] = fpath.name
+            if digest in digest_paths:
+                for old_date, old_fname in digest_paths[digest]:
+                    if abs((old_date - date).total_seconds()) < 3 * 24 * 3600:
+                        errmsg = " ".join([
+                            f"digest: {digest}",
+                            f"old_path: {digest_paths[digest]}",
+                            f"new_path : {fpath}",
+                        ])
+                        raise Exception(errmsg)
+                digest_paths[digest].append((date, fpath.name))
+            else:
+                digest_paths[digest] = [(date, fpath.name)]
 
-        if len(digest_paths) > 200:
+        if len(digest_paths) > limit * 10:
             break
 
     msg_iter = client.iter_messages(CHANNEL_NAME, min_id=min_id, limit=limit)
@@ -167,8 +194,8 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
             tgt_fname = old_messages[msg.id]['name']
 
             new_messages[msg.id].update({
-                'fwd' : msg.forwards,
-                'rct' : sum(res.count for res in msg.reactions.results),
+                'tfwd' : msg.forwards,
+                'trct' : sum(res.count for res in msg.reactions.results),
             })
             print("old         :", msg.id, digest, tgt_fname)
             continue
@@ -178,20 +205,23 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
 
         fname_prefix = msg.date.isoformat().replace(":", "")[:17]
         tgt_fname = fname_prefix + "_" + str(msg.id) + "_" + digest + ".jpg"
+        cur_date = parse_date(fname_prefix)
 
         # TODO (mb 2024-07-31): views/comments ?
         new_messages[msg.id] = {
             'name': tgt_fname,
-            'fwd' : msg.forwards,
-            'rct' : sum(res.count for res in msg.reactions.results),
+            'tfwd' : msg.forwards,
+            'trct' : sum(res.count for res in msg.reactions.results),
             'dig' : digest,
         }
 
+        # see if we can find an existing image that matches the digest
         if digest in digest_paths:
-            tgt_fname = digest_paths[digest]
-            new_messages[msg.id]['name'] = tgt_fname
-            print("dup detected:", msg.id, digest, fname_prefix, tgt_fname)
-            continue
+            for old_date, tgt_fname in digest_paths[digest]:
+                if abs((old_date - cur_date).total_seconds()) < 3 * 24 * 3600:
+                    new_messages[msg.id]['name'] = tgt_fname
+                    print("dup detected:", msg.id, digest, fname_prefix, tgt_fname)
+                    continue
 
         if msg.id < 13310:
             new_messages[msg.id]['name'] = None
