@@ -16,6 +16,9 @@ html: index.html media.html
 sync_and_ingest:
 	python3 scripts/panzer_imgsync.py
 	python3 scripts/ingest_uploads.py
+# 	git add scripts/telegram_messages_cache.json
+# 	git add images/
+# 	git commit -m "sync images from telegram"
 
 
 .PHONY: debug_ingest
