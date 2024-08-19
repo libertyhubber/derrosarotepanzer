@@ -25,10 +25,10 @@ def reprocess_images(root_dir):
 
 # Call the function to reprocess images
 reprocess_images('images/2021')
-reprocess_images('images/2022')
-reprocess_images('images/2023')
-reprocess_images('images/2024/01')
-reprocess_images('images/2024/02')
-reprocess_images('images/2024/03')
-reprocess_images('images/2024/04')
-reprocess_images('images/2024/05')
+# reprocess_images('images/2022')
+# reprocess_images('images/2023')
+# reprocess_images('images/2024/01')
+# reprocess_images('images/2024/02')
+# reprocess_images('images/2024/03')
+# reprocess_images('images/2024/04')
+# reprocess_images('images/2024/05')

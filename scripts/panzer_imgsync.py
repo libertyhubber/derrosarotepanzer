@@ -205,7 +205,7 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
 
         fname_prefix = msg.date.isoformat().replace(":", "")[:17]
         tgt_fname = fname_prefix + "_" + str(msg.id) + "_" + digest + ".jpg"
-        cur_date = parse_date(fname_prefix)
+        cur_date = _parse_date(fname_prefix)
 
         # TODO (mb 2024-07-31): views/comments ?
         new_messages[msg.id] = {
