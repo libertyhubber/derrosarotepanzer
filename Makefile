@@ -5,13 +5,14 @@ SHELL := /bin/bash
 
 .PHONY: sync_and_ingest
 sync_and_ingest:
-	python3 scripts/panzer_imgsync.py
-	python3 scripts/ingest_uploads.py
-
-	git add scripts/telegram_messages_cache.json
-	git add images/
+	git checkout scripts/telegram_messages_cache.json;
+	git pull --rebase;
+	python3 scripts/panzer_imgsync.py;
+	python3 scripts/ingest_uploads.py;
 
 	@if [ $$(git status --porcelain -- images/ | wc -l) -gt 0 ]; then \
+		git add scripts/telegram_messages_cache.json; \
+		git add images/; \
 		git commit -m "update $(shell date --iso)"; \
 		git push; \
 	fi
