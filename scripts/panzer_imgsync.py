@@ -210,8 +210,8 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
         # TODO (mb 2024-07-31): views/comments ?
         new_messages[msg.id] = {
             'name': tgt_fname,
-            'tfwd' : msg.forwards,
-            'trct' : sum(res.count for res in msg.reactions.results),
+            'tfwd': msg.forwards,
+            'trct': sum(res.count for res in msg.reactions.results),
             'dig' : digest,
         }
 
