@@ -207,13 +207,18 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
         tgt_fname = fname_prefix + "_" + str(msg.id) + "_" + digest + ".jpg"
         cur_date = _parse_date(fname_prefix)
 
-        # TODO (mb 2024-07-31): views/comments ?
-        new_messages[msg.id] = {
-            'name': tgt_fname,
-            'tfwd': msg.forwards,
-            'trct': sum(res.count for res in msg.reactions.results),
-            'dig' : digest,
-        }
+        try:
+            reactions = sum(res.count for res in msg.reactions.results)
+            # TODO (mb 2024-07-31): views/comments ?
+            new_messages[msg.id] = {
+                'name': tgt_fname,
+                'tfwd': int(msg.forwards),
+                'trct': reactions,
+                'dig' : digest,
+            }
+        except (AttributeError, ValueError) as err:
+            print("ERROR: ", err)
+            break
 
         # see if we can find an existing image that matches the digest
         if digest in digest_paths:
