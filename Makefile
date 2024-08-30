@@ -39,3 +39,8 @@ html: index.html media.html
 .PHONY: serve
 serve:
 	python3 -m http.server 8080
+
+
+.PHONY: watch
+watch:
+	watch --interval 7200 -c 'make sync_and_ingest 2>>sync.log >> sync.log'
