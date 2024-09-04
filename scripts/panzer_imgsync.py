@@ -193,10 +193,11 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
             digest = old_messages[msg.id]['dig']
             tgt_fname = old_messages[msg.id]['name']
 
-            new_messages[msg.id].update({
-                'tfwd' : msg.forwards,
-                'trct' : sum(res.count for res in msg.reactions.results),
-            })
+            if msg.reactions:
+                new_messages[msg.id].update({
+                    'tfwd' : msg.forwards,
+                    'trct' : sum(res.count for res in msg.reactions.results),
+                })
             print("old         :", msg.id, digest, tgt_fname)
             continue
 
@@ -207,18 +208,18 @@ async def fetch_api_messages(old_messages: dict[int, dict]) -> dict[int, dict]:
         tgt_fname = fname_prefix + "_" + str(msg.id) + "_" + digest + ".jpg"
         cur_date = _parse_date(fname_prefix)
 
-        try:
+        if msg.reactions:
             reactions = sum(res.count for res in msg.reactions.results)
-            # TODO (mb 2024-07-31): views/comments ?
-            new_messages[msg.id] = {
-                'name': tgt_fname,
-                'tfwd': int(msg.forwards),
-                'trct': reactions,
-                'dig' : digest,
-            }
-        except (AttributeError, ValueError) as err:
-            print("ERROR: ", err)
-            break
+        else:
+            reactions = 0
+
+        # TODO (mb 2024-07-31): views/comments ?
+        new_messages[msg.id] = {
+            'name': tgt_fname,
+            'tfwd': int(msg.forwards),
+            'trct': reactions,
+            'dig' : digest,
+        }
 
         # see if we can find an existing image that matches the digest
         if digest in digest_paths:
